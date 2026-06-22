@@ -16,7 +16,7 @@ Requirements:
   - AstrBot >= v4.26.0
   - Python >= 3.12
   - GenieTTS HTTP API (default: http://127.0.0.1:9999)
-  - DeepSeek API Key (set as DEEPSEEK_API_KEY environment variable)
+  - LLM API Key (set as OPENAI_API_KEY environment variable)
 """
 
 import asyncio
@@ -112,11 +112,15 @@ class EmotionVoicePlugin(star.Star):
 
     @property
     def ds(self) -> AsyncOpenAI:
-        """DeepSeek API client (OpenAI-compatible), lazy-loaded."""
+        """LLM API client (OpenAI-compatible), lazy-loaded.
+
+        Uses ``OPENAI_API_KEY`` for authentication and ``OPENAI_BASE_URL``
+        for the endpoint. Works with any OpenAI-compatible provider.
+        """
         if self._ds is None:
             self._ds = AsyncOpenAI(
-                api_key=os.getenv("DEEPSEEK_API_KEY", ""),
-                base_url="https://api.deepseek.com",
+                api_key=os.getenv("OPENAI_API_KEY", ""),
+                base_url=os.getenv("OPENAI_BASE_URL", "https://api.deepseek.com"),
             )
         return self._ds
 

@@ -48,7 +48,7 @@ User message → AstrBot → LLM Call 1 → Chinese text reply (instant)
 - Python >= 3.12
 - GenieTTS HTTP API (default: `http://127.0.0.1:9999`)
 - Any OpenAI-compatible LLM provider configured in AstrBot
-- LLM API key set as env var (`DEEPSEEK_API_KEY` for DeepSeek, `OPENAI_API_KEY` for OpenAI, etc.)
+- LLM API key set as env var (`OPENAI_API_KEY`)
 
 ### Installation
 
@@ -57,7 +57,7 @@ User message → AstrBot → LLM Call 1 → Chinese text reply (instant)
 cp -r emotion_voice /opt/qq-bot/astrbot/data/plugins/
 
 # Set your API key
-echo 'DEEPSEEK_API_KEY=sk-xxx' >> /etc/systemd/system/astrbot.service
+echo 'OPENAI_API_KEY=sk-xxx' >> /etc/systemd/system/astrbot.service
 
 # Restart AstrBot
 systemctl restart astrbot
@@ -107,7 +107,7 @@ Reference audios should use the naming format `【EMOTION】reference_text.wav`.
 |---------|----------|
 | Voice not triggering | Check `voice status` — auto may be off or probability too low |
 | GenieTTS connection failed | Verify: `curl http://127.0.0.1:9999/health` |
-| API key error | Ensure `DEEPSEEK_API_KEY` (or your provider's equivalent) is set in systemd env |
+| API key error | Ensure `OPENAI_API_KEY` is set in systemd env for plugin Call 2 |
 | Voice test works but auto doesn't | Increase `auto_prob` or check cooldown hasn't elapsed |
 | Using a different LLM | Change model in settings panel — any OpenAI-compatible model works |
 
@@ -153,7 +153,7 @@ Reference audios should use the naming format `【EMOTION】reference_text.wav`.
 - Python >= 3.12
 - GenieTTS HTTP API（默认: `http://127.0.0.1:9999`）
 - AstrBot 中已配置任意兼容 OpenAI 格式的 LLM 提供商
-- LLM API Key 设为环境变量（DeepSeek 用 `DEEPSEEK_API_KEY`，OpenAI 用 `OPENAI_API_KEY` 等）
+- LLM API Key 设为环境变量 (`OPENAI_API_KEY`)
 
 ### 安装
 
@@ -162,7 +162,7 @@ Reference audios should use the naming format `【EMOTION】reference_text.wav`.
 cp -r emotion_voice /opt/qq-bot/astrbot/data/plugins/
 
 # 设置 API Key
-echo 'DEEPSEEK_API_KEY=sk-xxx' >> /etc/systemd/system/astrbot.service
+echo 'OPENAI_API_KEY=sk-xxx' >> /etc/systemd/system/astrbot.service
 
 # 重启 AstrBot
 systemctl restart astrbot
@@ -212,7 +212,7 @@ Content-Type: application/json
 |------|----------|
 | 语音不触发 | 检查 `voice status` — 可能自动语音已关闭或概率太低 |
 | GenieTTS 连接失败 | 验证: `curl http://127.0.0.1:9999/health` |
-| API Key 错误 | 确保 `DEEPSEEK_API_KEY`（或你所用提供商的对应变量）已设置在 systemd env 中 |
+| API Key 错误 | 确保 `OPENAI_API_KEY` 已设置在 systemd env 中，供插件调用②使用 |
 | voice test 能用于自动不行 | 提高 `auto_prob` 或检查冷却时间是否未过 |
 | 换用其他大模型 | 在设置面板中修改模型名 — 任何兼容 OpenAI 格式的模型均可 |
 
