@@ -1,0 +1,35 @@
+{
+  "genie_url": {
+    "description": "GenieTTS 地址",
+    "type": "string",
+    "hint": "GenieTTS HTTP API 地址，默认本地 9999 端口",
+    "obvious_hint": true,
+    "default": "http://127.0.0.1:9999"
+  },
+  "ds_model": {
+    "description": "DeepSeek 模型",
+    "type": "string",
+    "options": ["deepseek-v4-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"],
+    "labels": ["V4 Flash (最快)", "V4 Pro", "V3 Chat", "R1 Reasoner"],
+    "hint": "调用② 情感分析 + 翻译使用的模型。推荐 V4 Flash 速度最快，V4 Pro 翻译质量更好",
+    "default": "deepseek-v4-flash"
+  },
+  "auto_prob": {
+    "description": "自动语音概率",
+    "type": "float",
+    "hint": "每次回复自动合成语音的概率，0.0 到 1.0。0 为不自动触发，1 为始终触发",
+    "default": 0.3
+  },
+  "cooldown": {
+    "description": "冷却时间（秒）",
+    "type": "int",
+    "hint": "同一会话两次自动语音的最小间隔秒数。防止刷屏",
+    "default": 10
+  },
+  "auto_enabled": {
+    "description": "启用自动语音",
+    "type": "bool",
+    "hint": "开启后按概率自动合成语音。关闭后仅响应 voice test 命令",
+    "default": true
+  }
+}
