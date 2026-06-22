@@ -1,102 +1,116 @@
-# Emotion Voice - AstrBot 情感语音插件
+# Emotion Voice - AstrBot Plugin
 
-中文文字聊天 + 日语情感语音，基于 DeepSeek V4 + GenieTTS 双调用架构。
+[![Version](https://img.shields.io/badge/version-2.1.0-blue)](https://github.com/nanirise/astrbot_plugin_emotion_voice)
+[![AstrBot](https://img.shields.io/badge/astrbot->=4.26.0b1-green)](https://github.com/AstrBotDevs/AstrBot)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-orange)](./LICENSE)
 
-## 工作流程
+Chinese chat + Japanese emotional voice synthesis, powered by GenieTTS with 7 emotion-tracking reference audios. Works with any OpenAI-compatible LLM (DeepSeek, OpenAI, SiliconFlow, etc).
+
+中文聊天 + 日语情感语音合成，基于 GenieTTS 和 7 种情感参考音频。支持任意兼容 OpenAI 格式的大模型。**当语音触发时，中文原文会与日语语音一同发送，一条消息即可看到文字 + 听到语音。**
+
+---
+
+## Architecture
 
 ```
-用户消息 → AstrBot → LLM 调用① → 中文文字回复
-                           ↓
-                     DeepSeek 调用②
-                     ├─ 分析用户情感 → 选择参考音频
-                     └─ 翻译中文→日语
-                           ↓
-                     GenieTTS
-                     ├─ 参考音频 (情感)
-                     └─ 日语文本
-                           ↓
-                     QQ 语音消息
+User message → AstrBot → LLM Call 1 → Chinese text reply (instant)
+                            ↓
+(trigger: voice on / auto-probability)
+                            ↓
+                      LLM Call 2
+                      ├─ emotion analysis → select reference audio
+                      └─ Chinese → Japanese translation
+                            ↓
+                      GenieTTS
+                      ├─ reference audio (emotion-matched)
+                      └─ Japanese text
+                            ↓
+                      QQ: Chinese text + Japanese voice (one message)
 ```
 
-## 依赖
+**When voice triggers, the Chinese reply text is sent alongside the Japanese voice in a single message.**
+
+---
+
+## Features
+
+- **Dual-call architecture** — text responds instantly, voice generates separately
+- **Voice + text in one message** — Chinese reply is included with the Japanese voice
+- **7 emotion reference audios** — HAPPY / SAD / ANGRY / EXCITED / WORRIED / GENTLE / NATURAL
+- **LLM-agnostic** — any OpenAI-compatible provider (DeepSeek, OpenAI, SiliconFlow, Qwen, etc.)
+- **WebUI settings panel** — `_conf_schema.json` with real-time config changes
+- **Cooldown + probability** — prevent voice spam
+- **Config persistence** — settings survive reboots
+
+## Requirements
 
 - AstrBot >= v4.26.0
 - Python >= 3.12
-- GenieTTS HTTP API (`http://127.0.0.1:9999`)
-- DeepSeek API Key (环境变量 `DEEPSEEK_API_KEY`)
+- GenieTTS HTTP API (default: `http://127.0.0.1:9999`)
+- Any OpenAI-compatible LLM provider configured in AstrBot
+- LLM API key set as env var (`DEEPSEEK_API_KEY` for DeepSeek, `OPENAI_API_KEY` for OpenAI, etc.)
 
-## 安装
+## Installation
 
 ```bash
-# 放到 AstrBot 插件目录
+# Place plugin in AstrBot plugin directory
 cp -r emotion_voice /opt/qq-bot/astrbot/data/plugins/
 
-# 设置 API Key
+# Set your API key
 echo 'DEEPSEEK_API_KEY=sk-xxx' >> /etc/systemd/system/astrbot.service
 
-# 重启 AstrBot
+# Restart AstrBot
 systemctl restart astrbot
 ```
 
-## 设置页面
+## Commands
 
-在 AstrBot WebUI 管理面板中直接配置，无需编辑代码：
+| Command | Description |
+|---------|-------------|
+| `voice on` | Enable auto voice (persisted across restarts) |
+| `voice off` | Disable auto voice (persisted across restarts) |
+| `voice status` | Show current config: probability, cooldown, model, GenieTTS URL |
+| `voice test <Japanese>` | Test voice synthesis with given Japanese text |
 
-| 设置项 | 说明 | 默认值 |
-|--------|------|--------|
-| GenieTTS 地址 | GenieTTS HTTP API 地址 | `http://127.0.0.1:9999` |
-| DeepSeek 模型 | 调用②使用的模型 | `deepseek-v4-flash` |
-| 自动语音概率 | 每次回复合成语音的概率 | `0.30` |
-| 冷却时间 | 同一会话两次语音间隔 | `10s` |
-| 启用自动语音 | 全局开关 | `true` |
+## Configuration
 
-路径：**WebUI → 插件 → emotion_voice → 设置**
+Path: **WebUI → Plugins → emotion_voice → Settings**
 
-## 指令
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| GenieTTS URL | string | `http://127.0.0.1:9999` | GenieTTS HTTP API address |
+| LLM Model | select | `deepseek-v4-flash` | Model for Call 2 (emotion + translation) |
+| Auto Probability | float | `0.30` | Probability of auto voice per reply (0.0–1.0) |
+| Cooldown | int | `10` | Minimum seconds between voice messages |
+| Enable Auto Voice | bool | `true` | Global on/off switch |
 
-| 指令 | 说明 |
-|------|------|
-| `voice on` | 开启自动语音（持久化） |
-| `voice off` | 关闭自动语音（持久化） |
-| `voice status` | 查看当前配置状态 |
-| `voice test <日语>` | 测试语音合成 |
+All changes take effect immediately and persist across restarts.
 
-## 触发逻辑
+## GenieTTS Setup
 
-- 通过 `voice on/off` 全局开关控制
-- 自动语音按 `auto_prob` 概率触发
-- 同一会话在 `cooldown` 秒内不重复
-- WebUI 设置页实时修改所有参数
-
-## GenieTTS API
+Requires a GenieTTS HTTP API at the configured URL:
 
 ```bash
 POST /tts
 Content-Type: application/json
 
-{
-  "text": "日本語テキスト",
-  "emotion": "HAPPY"
-}
+{"text": "日本語テキスト", "emotion": "HAPPY"}
 
-# 返回: WAV 音频文件
+# Response: WAV audio file
 ```
 
-## 情感参考音频
+Reference audios should use the naming format `【EMOTION】reference_text.wav`.
 
-插件根据 DeepSeek 分析结果自动选择对应情感的参考音频：
+## Troubleshooting
 
-```
-genie-tts/references/
-├── 【ANGRY】*.wav
-├── 【EXCITED】*.wav
-├── 【GENTLE】*.wav
-├── 【HAPPY】*.wav
-├── 【NATURAL】*.wav
-├── 【SAD】*.wav
-└── 【WORRIED】*.wav
-```
+| Problem | Solution |
+|---------|----------|
+| Voice not triggering | Check `voice status` — auto may be off or probability too low |
+| GenieTTS connection failed | Verify: `curl http://127.0.0.1:9999/health` |
+| API key error | Ensure `DEEPSEEK_API_KEY` (or your provider's equivalent) is set in systemd env |
+| Voice test works but auto doesn't | Increase `auto_prob` or check cooldown hasn't elapsed |
+| Using a different LLM | Change model in settings panel — any OpenAI-compatible model works |
 
-## 临时文件
+## License
 
-音频文件保存在 `temp_audio/`，发送后 30 秒自动清理。
+AGPL-3.0 (compatible with the AstrBot framework)
