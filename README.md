@@ -99,7 +99,15 @@ Content-Type: application/json
 # Response: WAV audio file
 ```
 
-Reference audios should use the naming format `【EMOTION】reference_text.wav`.
+Reference audios use the filename format `【EMOTION】reference_text.wav`. The emotion tag (in brackets) selects the audio for matching emotions, and the text after `】` is automatically used as the reference text for voice cloning — no separate text file needed.
+
+Example:
+```
+references/
+  【HAPPY】いいんじゃないんですか、青春っぽくて。.wav
+  【SAD】ワタシも有地さんと同じで、健康的な年頃の女の子ですから。.wav
+  【NATURAL】ええ、そうですね。ワタシの家は、町の西側の端っこの方です。.wav
+```
 
 ### Troubleshooting
 
@@ -204,7 +212,15 @@ Content-Type: application/json
 # Response: WAV audio file
 ```
 
-参考音频命名格式: `【情感】参考文本.wav`
+参考音频文件名格式 `【情感】参考文本.wav`。方括号内的情感标签用于匹配情绪，`】` 后面的文本自动作为参考文本用于语音克隆，无需额外文本文件。
+
+示例:
+```
+references/
+  【HAPPY】いいんじゃないんですか、青春っぽくて。.wav
+  【SAD】ワタシも有地さんと同じで、健康的な年頃の女の子ですから。.wav
+  【NATURAL】ええ、そうですね。ワタシの家は、町の西側の端っこの方です。.wav
+```
 
 ### 常见问题
 
